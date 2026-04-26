@@ -1,4 +1,5 @@
 import { envs } from './config';
+import { ServerRoutes } from './presentation/routes';
 import { Server } from './presentation/server';
 
 (() => {
@@ -9,6 +10,6 @@ async function main() {
   //TODO: async database
 
   //TODO; initialize server
-  const server = new Server({ port: envs.PORT });
+  const server = new Server({ port: envs.PORT, routes: ServerRoutes.routes });
   await server.start();
 }
