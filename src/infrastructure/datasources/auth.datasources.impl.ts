@@ -3,9 +3,10 @@ import { UserModel } from '../../data/postgresql';
 import {
   CustomError,
   RegisterUserDTO,
-  UserEntity,
+  UserResponseDTO,
   type AuthDataSource,
 } from '../../domain';
+import { UserMapper } from '../mappers/user-mapper';
 
 type HashMethod = (password: string) => string;
 
@@ -14,7 +15,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
   //async login(payload: TODO loginDTO): Promise<string> {
   // Implement login logic here
   //}
-  async register(payload: RegisterUserDTO): Promise<UserEntity> {
+  async register(payload: RegisterUserDTO): Promise<UserResponseDTO> {
     try {
       const [user] = await PostgresDatabase.getInstance()
         .insert(UserModel)
@@ -22,14 +23,7 @@ export class AuthDataSourceImpl implements AuthDataSource {
         .returning();
 
       if (!user) throw CustomError.internal();
-      return new UserEntity({
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        password: user.password,
-        role: user.role,
-        img: user.img ?? undefined,
-      });
+      return UserResponseDTO.fromEntity(UserMapper.userEntityFromObject(user));
     } catch (error) {
       if (error instanceof CustomError) {
         throw error;
