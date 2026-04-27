@@ -1,17 +1,12 @@
-import { PrismaPg } from '@prisma/adapter-pg';
-import { PrismaClient } from './../../../generated/prisma/client';
+import { drizzle } from 'drizzle-orm/node-postgres';
 
 export class PostgresDatabase {
-  private static prisma: PrismaClient;
+  private static db: ReturnType<typeof drizzle>;
 
   static async connect(databaseUrl: string) {
     try {
-      const adapter = new PrismaPg({
-        connectionString: databaseUrl,
-      });
-      this.prisma = new PrismaClient({ adapter });
-      await this.prisma.$connect();
-      await this.prisma.$queryRaw`SELECT 1`;
+      this.db = drizzle(databaseUrl);
+      await this.db.execute('SELECT 1');
       console.log('Database connected');
     } catch (error) {
       console.error('Database connection failed', error);
@@ -19,9 +14,9 @@ export class PostgresDatabase {
     }
   }
 
-  static getInstance(): PrismaClient {
-    if (!this.prisma)
+  static getInstance(): ReturnType<typeof drizzle> {
+    if (!this.db)
       throw new Error('Database not connected, call connect() first');
-    return this.prisma;
+    return this.db;
   }
 }
