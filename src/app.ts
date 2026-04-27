@@ -1,4 +1,5 @@
 import { envs } from './config';
+import { PostgresDatabase } from './data/postgresql/postgresql-db';
 import { ServerRoutes } from './presentation/routes';
 import { Server } from './presentation/server';
 
@@ -7,9 +8,8 @@ import { Server } from './presentation/server';
 })();
 
 async function main() {
-  //TODO: async database
+  await PostgresDatabase.connect(envs.DATABASE_URL);
 
-  //TODO; initialize server
   const server = new Server({ port: envs.PORT, routes: ServerRoutes.routes });
   await server.start();
 }
