@@ -1,9 +1,15 @@
 import type { Request, Response } from 'express';
-import { AuthRepository, RegisterUserDTO } from '../../domain';
+import { AuthRepository, CustomError, RegisterUserDTO } from '../../domain';
 
 export class AuthController {
   constructor(private readonly authRepository: AuthRepository) {}
 
+  private handleError(error: unknown, res: Response) {
+    if (error instanceof CustomError) {
+      return res.status(error.statusCode).json({ error: error.message });
+    }
+    res.status(500).json({ error: 'Internal server error' });
+  }
   registerUser = (req: Request, res: Response) => {
     const [error, data] = RegisterUserDTO.create(req.body);
 
@@ -15,9 +21,7 @@ export class AuthController {
       .then((user) => {
         res.status(201).json(user);
       })
-      .catch((error) => {
-        res.status(500).json(error);
-      });
+      .catch((error) => this.handleError(error, res));
   };
 
   loginUser = (req: Request, res: Response) => {
