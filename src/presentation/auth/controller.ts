@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
-import { RegisterUserDTO } from '../../domain';
+import { AuthRepository, RegisterUserDTO } from '../../domain';
 
 export class AuthController {
-  constructor() {}
+  constructor(private readonly authRepository: AuthRepository) {}
 
   registerUser = (req: Request, res: Response) => {
     const [error, data] = RegisterUserDTO.create(req.body);
@@ -10,7 +10,14 @@ export class AuthController {
     if (error) {
       return res.status(400).json({ error });
     }
-    res.json(data);
+    this.authRepository
+      .register(data!)
+      .then((user) => {
+        res.status(201).json(user);
+      })
+      .catch((error) => {
+        res.status(500).json(error);
+      });
   };
 
   loginUser = (req: Request, res: Response) => {
