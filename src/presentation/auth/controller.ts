@@ -1,9 +1,21 @@
 import type { Request, Response } from 'express';
-import { AuthRepository, CustomError, RegisterUserDTO } from '../../domain';
+import {
+  AuthRepository,
+  CustomError,
+  RegisterUserDTO,
+  RegisterUserUseCase,
+} from '../../domain';
 import { JwtAdapter } from '../../config';
 
 export class AuthController {
-  constructor(private readonly authRepository: AuthRepository) {}
+  private readonly registerUserUseCase: RegisterUserUseCase;
+
+  constructor(private readonly authRepository: AuthRepository) {
+    this.registerUserUseCase = new RegisterUserUseCase(
+      this.authRepository,
+      JwtAdapter.generateToken,
+    );
+  }
 
   private handleError(error: unknown, res: Response) {
     if (error instanceof CustomError) {
@@ -17,15 +29,10 @@ export class AuthController {
     if (error) {
       return res.status(400).json({ error });
     }
-    this.authRepository
-      .register(data!)
-      .then(async (user) => {
-        const token = await JwtAdapter.generateToken({
-          userId: user.id,
-        });
-        res.status(201).json({ user, token });
-      })
-      .catch((error) => this.handleError(error, res));
+    this.registerUserUseCase
+      .execute(data!)
+      .then((result) => res.status(201).json(result))
+      .catch((err) => this.handleError(err, res));
   };
 
   loginUser = (req: Request, res: Response) => {
