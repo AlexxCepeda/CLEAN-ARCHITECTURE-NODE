@@ -1,10 +1,9 @@
 import { JwtAdapter } from '../../../config';
-import type { LoginUserDTO } from '../../dtos/auth/login-user.dto';
-import { RegisterUserDTO } from '../../dtos/auth/register-user.dto';
-import type { UserResponseDTO } from '../../dtos/auth/response-user.dto';
+import { LoginUserDTO } from '../../dtos/auth/login-user.dto';
+import { UserResponseDTO } from '../../dtos/auth/response-user.dto';
 import { CustomError } from '../../errors/custom.error';
-import type { AuthRepository } from '../../repositories/auth.repository';
-import { type SignOptions } from 'jsonwebtoken';
+import { AuthRepository } from '../../repositories/auth.repository';
+import type { SignOptions } from 'jsonwebtoken';
 
 interface ILoginUserUseCase {
   execute(loginUserDto: LoginUserDTO): Promise<any>;
