@@ -2,6 +2,8 @@ import type { Request, Response } from 'express';
 import {
   AuthRepository,
   CustomError,
+  LoginUserDTO,
+  LoginUserUseCase,
   RegisterUserDTO,
   RegisterUserUseCase,
 } from '../../domain';
@@ -9,9 +11,14 @@ import { JwtAdapter } from '../../config';
 
 export class AuthController {
   private readonly registerUserUseCase: RegisterUserUseCase;
+  private readonly loginUserUseCase: LoginUserUseCase;
 
   constructor(private readonly authRepository: AuthRepository) {
     this.registerUserUseCase = new RegisterUserUseCase(
+      this.authRepository,
+      JwtAdapter.generateToken,
+    );
+    this.loginUserUseCase = new LoginUserUseCase(
       this.authRepository,
       JwtAdapter.generateToken,
     );
@@ -36,6 +43,14 @@ export class AuthController {
   };
 
   loginUser = (req: Request, res: Response) => {
-    res.json('Controller: User logged in');
+    const [error, data] = LoginUserDTO.create(req.body);
+
+    if (error) {
+      return res.status(400).json({ error });
+    }
+    this.loginUserUseCase
+      .execute(data!)
+      .then((result) => res.status(200).json(result))
+      .catch((err) => this.handleError(err, res));
   };
 }

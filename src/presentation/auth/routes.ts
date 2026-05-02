@@ -6,7 +6,10 @@ import { BCryptAdapter } from '../../config';
 export class AuthRoutes {
   static get routes(): Router {
     const router = Router();
-    const database = new AuthDataSourceImpl(BCryptAdapter.hash);
+    const database = new AuthDataSourceImpl(
+      BCryptAdapter.hash,
+      BCryptAdapter.compare,
+    );
     const authRepository = new AuthRepositoryImpl(database);
     const { loginUser, registerUser } = new AuthController(authRepository);
     router.post('/login', loginUser);
